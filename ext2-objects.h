@@ -47,5 +47,55 @@ struct ext2_superblock {
   uint8_t s_prealloc_blocks; //number of blocks to preallocate
   uint8_t s_prealloc_dir_blocks; //number of blocks to preallocate for directories. 
   uint16_t s_padding1; //allignment to word
-  uint32_t s_researved[204] = {0};
+  uint32_t s_researved[204];
 };
+
+
+
+struct ext2_group_desc {
+	uint32_t bg_block_bitmap; //Block number of block bitmap
+	uint32_t bg_inode_bitmap; //Block number of inode bitmap
+	uint32_t bg_inode_table; //Block number of first inode table block
+	uint16_t bg_free_blocks_count; //Number of free blocks in group
+	uint16_t bg_free_inodes_count; //Number of free inodes in group
+	uint16_t bg_used_dirs_count; //Number of directories in group
+	uint16_t bg_pad; // allight to word
+	uint32_t bg_reserved[3]; //Nulls to pad out to 24bytes
+};
+
+struct ext2_inode {
+	uint16_t i_mode; //File type and access rights
+	uint16_t i_uid; //owner identifier
+	uint32_t i_size; //file length in bytes
+	uint32_t i_atime; //Time of last access
+	uint32_t i_ctime; //time that inode last changed
+	uint32_t i_mtime; //Time that file content last changed
+	uint32_t i_dtime; //Time of file deletion
+	uint16_t i_gid; //Group identifier
+	uint16_t i_links_count; //Hard links counter
+	uint32_t i_blocks;//Number of data blocks of that file
+	uint32_t i_flags; //File flags
+	//union osd1; //OS Specific Flags
+	uint32_t osd1; //OS Specific Flags TODO: replace with union
+	uint32_t i_direct_blocks[12]; //First 12 block numbers
+	uint32_t i_single_block; //block number of single indirect block
+	uint32_t i_double_block; //block number of double indirect block
+	uint32_t i_triple_block; //block number of triple indirect block
+	uint32_t i_generation; //Generation number
+	uint32_t i_file_acl; // File ACL (>= v1)
+	uint32_t i_dir_acl; // Dir ACL (>= 1)
+	uint32_t i_faddr;
+	//TODO:: replace with union to handle HURD/MASIX
+	struct linux_osd2 {
+		unsigned char osd1_frag; //Fragment number
+		unsigned char osd1_frag_size; //Fragment size
+		char researved_1[2]; //Fragment size
+		unsigned short osd1_upper_user_id; //High 16 bits of 32-bit user id
+		unsigned short osd1_upper_group_id; //High 16 bits of 32-bt group id
+		char researved_2[4]; //Fragment size
+	};
+};
+
+
+
+
