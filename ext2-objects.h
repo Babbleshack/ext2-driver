@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-struct ext2_superblock {
+typedef struct ext2_superblock {
   uint32_t s_inode_count; //Total number of Inodes
   uint32_t s_block_count; //Filesystem size in blocks
   uint32_t s_r_block_count; //number of researved blocks
@@ -48,11 +48,11 @@ struct ext2_superblock {
   uint8_t s_prealloc_dir_blocks; //number of blocks to preallocate for directories. 
   uint16_t s_padding1; //allignment to word
   uint32_t s_researved[204];
-};
+} ext2_superblock_t;
 
 
 
-struct ext2_group_desc {
+typedef struct ext2_group_desc {
 	uint32_t bg_block_bitmap; //Block number of block bitmap
 	uint32_t bg_inode_bitmap; //Block number of inode bitmap
 	uint32_t bg_inode_table; //Block number of first inode table block
@@ -61,9 +61,9 @@ struct ext2_group_desc {
 	uint16_t bg_used_dirs_count; //Number of directories in group
 	uint16_t bg_pad; // allight to word
 	uint32_t bg_reserved[3]; //Nulls to pad out to 24bytes
-};
+} ext2_group_desc_t;
 
-struct ext2_inode {
+typedef struct ext2_inode {
 	uint16_t i_mode; //File type and access rights
 	uint16_t i_uid; //owner identifier
 	uint32_t i_size; //file length in bytes
@@ -93,7 +93,7 @@ struct ext2_inode {
 		unsigned short osd1_upper_user_id; //High 16 bits of 32-bit user id
 		unsigned short osd1_upper_group_id; //High 16 bits of 32-bt group id
 		char researved_2[4]; //Fragment size
-	};
+	} ext2_inode_t;
 };
 
 
