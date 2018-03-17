@@ -2,6 +2,8 @@
 ext2fs
 tags
 *.out
+*.img
+*.pdf
 
 # Created by https://www.gitignore.io/api/c,tags
 
