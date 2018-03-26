@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <math.h>
 
 #define SUPERBLOCK_ADDR 1024
+#define SUPERBLOCK_SIZE 1024 //replace with sizeof(ext2_superblock_t);
 
 void readSuperBlock(FILE *ext2fd, ext2_superblock_t* sblock) {
     memset(sblock, 0, sizeof(ext2_superblock_t));
@@ -31,6 +34,27 @@ void readSuperBlock(FILE *ext2fd, ext2_superblock_t* sblock) {
 
 }
 
+void readBlockGroupDescriptor(FILE *ext2fd, ext2_group_desc_t *bgDescription) {
+    long addr = (SUPERBLOCK_ADDR + SUPERBLOCK_SIZE);
+    if( (fseek(ext2fd, addr, SEEK_SET)) < 0) {
+        printf("Error fseek");   
+    }
+    memset(bgDescription, 0, sizeof(ext2_group_desc_t));
+    fread(bgDescription, sizeof(ext2_group_desc_t), 1, ext2fd);
+}
+
+int assertBlocksPerGroup(ext2_superblock_t *superblock) {
+    double blocksViaBlocksPerGroup = (double)superblock->s_block_count / superblock->s_blocks_per_group;
+    double blocksViaInodesPerGroup = (double)superblock->s_inode_count / superblock->s_inodes_per_group;
+    int r1 = round(blocksViaBlocksPerGroup);
+    int r2 = round(blocksViaInodesPerGroup);
+    return (r1 == r2);
+}
+
+int validateMagicNumber(ext2_superblock_t *superblock) {
+    return(superblock->s_magic == 0xef53);
+}
+
 int main() {
     FILE *ext2fd = fopen("./ext2fs", "rw");
     ext2_superblock_t *superblock = malloc(sizeof(ext2_superblock_t)); 
@@ -38,6 +62,26 @@ int main() {
     printf("%lu\n", sizeof(*superblock));
     printf("volume name: %s\n", superblock->s_volume_name);
     printf("last mount path: %s\n", superblock->s_last_mounted);
+
+    if(!assertBlocksPerGroup(superblock)) {
+        printf("Blocks per group error\n");
+    }
+    if(!validateMagicNumber(superblock)) {
+        printf("magic number error\n");
+    }
+
+    uint32_t blockSize = (1024 << superblock->s_log_block_size); 
+
+    printf("block size: %u\n", blockSize);
+
+    ext2_group_desc_t *groupDescriptor = malloc(sizeof(ext2_group_desc_t));
+    readBlockGroupDescriptor(ext2fd, groupDescriptor);
+
+    printf("free blocks in group %u\n", groupDescriptor->bg_free_blocks_count);
+
+
+
+    
     free(superblock);
     fclose(ext2fd);
     return(0);
